@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8901944631132702227
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3250249447277470484}
+  - component: {fileID: 8338439711845136903}
+  m_Layer: 0
+  m_Name: PortalSkill
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3250249447277470484
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8901944631132702227}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.73680633, y: 0.58212626, z: 0.03865989}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8338439711845136903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8901944631132702227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f742c4f3027d54e47b39b474c9b7af05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillName: Portal
+  cooldownTime: 0.2
+  maxDurability: 4
+  currentDurability: 0
+  playerMovement: {fileID: 0}
+  bluePortalPrefab: {fileID: 1738477845538710108, guid: bd507881880a4634baf8074a8bca435c, type: 3}
+  orangePortalPrefab: {fileID: 1498610788722610016, guid: 8e381ae90a4b2e149b93be75e2de7c0d, type: 3}
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  firePoint: {fileID: 0}
+  rayDistance: 30
+  rotationOffset: 90

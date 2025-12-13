@@ -10,6 +10,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Animator animator;
 
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
+
+    public float speedMultiplier = 1f;
     void Start()
     {
         Rigidbody2D = GetComponent<Rigidbody2D>();
