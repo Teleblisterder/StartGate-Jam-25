@@ -125,7 +125,7 @@ public class PlayerSkillManager : MonoBehaviour
         skillSlots[selectedSlotIndex] = null;
 
         // 2. Yetenek objesinin kendisini tamamen YOK ET!
-        Destroy(discardedSkill.gameObject, 1f);
+        Destroy(discardedSkill.gameObject);
 
 
         Debug.Log($"[{selectedSlotIndex + 1}. SLOTTAN ÇIKARILDI] {skillName} yeteneði tamamen yok edildi.");
