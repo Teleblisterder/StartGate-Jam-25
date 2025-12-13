@@ -1,5 +1,5 @@
-ï»¿using UnityEngine;
-using System.Collections; // IEnumerator iÃ§in gerekli
+
+using UnityEngine;
 
 public class Telekinesi : SkillBase
 {
@@ -7,68 +7,62 @@ public class Telekinesi : SkillBase
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private Transform firePoint;
 
-    [Header("GÃ¶rsel Efektler")]
-    [SerializeField] private LineRenderer lineRenderer;
-    [SerializeField] private float laserDuration = 0.1f;
-    private Coroutine laserCoroutine;
-
     [Header("Ayarlar")]
-    public float pushForce = 20f;
+    public float pushForce = 20f; // Impulse çok güçlüdür, 100 yerine 20-30 dene
     public float pullForce = 20f;
     public float range = 50f;
-    public string targetTag;
-
+    public string targetTag;    // "Kutu" vs. yazmayý unutma
     private void Start()
     {
-        // 1. OYUNCUYU BUL (Garanti YÃ¶ntem)
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-
-        // PlayerMovement'Ã½ al
         if (playerMovement == null)
             playerMovement = GetComponentInParent<PlayerMovement>();
 
-        // 2. LINE RENDERER'I BUL (Player'Ã½n iÃ§indeki "LaserEffect" objesinden)
-        if (lineRenderer == null)
-        {
-            Transform laserObj = player.transform.Find("LaserEffect");
-            if (laserObj != null)
-            {
-                lineRenderer = laserObj.GetComponent<LineRenderer>();
-                lineRenderer.enabled = false; // BaÃ¾langÃ½Ã§ta kapat
-            }
-            else
-            {
-                Debug.LogError("HATA: Player'Ã½n iÃ§inde 'LaserEffect' adÃ½nda bir obje yok!");
-            }
-        }
 
-        // 3. FIREPOINT'I BUL
+        // 2. FirePoint Transformunu Bulma:
+        // FirePoint'in Player objesinin bir alt objesi olduðunu varsayýyoruz.
         if (firePoint == null)
         {
-            firePoint = player.transform.Find("FirePoint");
-        }
-        else
-        {
-            Debug.LogError("HATA: Sahnede 'Player' tagine sahip bir obje bulunamadÃ½!");
+            Transform playerParent = transform.parent;
+            firePoint = playerParent.Find("FirePoint");
+
         }
     }
 
-    // --- E TUÃžU: ÃTME (PUSH) ---
+    // --- E TUÞU: ÝTME (PUSH) ---
     public override void UsePrimary()
     {
-        if (!IsReady()) return;
-        TryApplyForce(true); // true = Ãtme
+        // Cooldown kontrolü
+        if (!IsReady())
+        {
+            // Eðer IsReady false döndürürse, yukarýdaki SkillBase metodundan uyarý logu zaten çýkar.
+            return; // Hýzlýca çýkýþ yap.
+        }
+
+        Debug.Log(">> Telekinezi: ÝTME (E) <<");
+        TryApplyForce(true); // true = Ýtme
+
+        // Cooldown sýfýrla
         nextFireTime = Time.time + cooldownTime;
     }
 
-    // --- Q TUÃžU: Ã‡EKME (PULL) ---
+    // --- Q TUÞU: ÇEKME (PULL) ---
     public override void UseSecondary()
     {
-        if (!IsReady()) return;
-        TryApplyForce(false); // false = Ã‡ekme
+        // Cooldown kontrolü
+        if (!IsReady())
+        {
+            // Eðer IsReady false döndürürse, yukarýdaki SkillBase metodundan uyarý logu zaten çýkar.
+            return; // Hýzlýca çýkýþ yap.
+        }
+
+        Debug.Log(">> Telekinezi: ÇEKME (Q) <<");
+        TryApplyForce(false); // false = Çekme
+
+        // Cooldown sýfýrla
         nextFireTime = Time.time + cooldownTime;
     }
 
+    // Mantýk fonksiyonu (Burada bir deðiþiklik yapmadým, sadece temizledim)
     void TryApplyForce(bool isPushing)
     {
         if (playerMovement == null) return;
@@ -76,23 +70,17 @@ public class Telekinesi : SkillBase
         Vector2 rawDirection = PlayerMovement.FacingDirection;
         Vector2 finalDirection = GetCardinalDirection(rawDirection);
 
-        // IÃ¾Ã½n karakterin biraz Ã¶nÃ¼nden Ã§Ã½ksÃ½n
+        // Iþýn karakterin biraz önünden çýksýn ki kendi colliderýna çarpmasýn
         Vector2 origin = (firePoint != null ? (Vector2)firePoint.position : (Vector2)transform.position) + finalDirection * 1f;
 
         RaycastHit2D hit = Physics2D.Raycast(origin, finalDirection, range);
 
-        // --- GÃ–RSEL KISIM: Lazer Rengini Belirle ve Ã‡iz ---
-        Color laserColor = isPushing ? Color.red : Color.green; // Ãtme KÃ½rmÃ½zÃ½, Ã‡ekme YeÃ¾il
-
-        // EÃ°er bir Ã¾eye Ã§arptÃ½ysa oraya kadar, Ã§arpmadÃ½ysa menzil sonuna kadar Ã§iz
-        Vector2 endPoint = hit.collider != null ? hit.point : (origin + finalDirection * range);
-
-        DrawLaser(origin, endPoint, laserColor);
-        // --------------------------------------------------
+        // Ýtme ise Kýrmýzý, Çekme ise Yeþil çizgi çiz
+        Debug.DrawRay(origin, finalDirection * range, isPushing ? Color.red : Color.green, 0.5f);
 
         if (hit.collider != null)
         {
-            // Tag kontrolÃ¼ (EÃ°er targetTag boÃ¾ deÃ°ilse kontrol et)
+            // Eðer targetTag boþ deðilse ve çarptýðýmýz þeyin tag'i tutmuyorsa dur.
             if (!string.IsNullOrEmpty(targetTag) && !hit.collider.CompareTag(targetTag))
                 return;
 
@@ -100,42 +88,24 @@ public class Telekinesi : SkillBase
 
             if (boxRb != null)
             {
+                // Ýtme ise yön ayný, çekme ise yön ters (-finalDirection)
                 Vector2 forceDirection = isPushing ? finalDirection : -finalDirection;
                 float power = isPushing ? pushForce : pullForce;
 
-                // ForceMode2D.Impulse anlÃ½k vuruÃ¾ hissi verir
                 boxRb.AddForce(forceDirection * power, ForceMode2D.Impulse);
             }
         }
     }
 
-    // --- LAZER Ã‡ÃZME FONKSÃYONLARI ---
-    void DrawLaser(Vector2 startPos, Vector2 endPos, Color color)
-    {
-        if (lineRenderer == null) return;
-
-        if (laserCoroutine != null) StopCoroutine(laserCoroutine);
-
-        lineRenderer.enabled = true;
-        lineRenderer.startColor = color;
-        lineRenderer.endColor = color;
-        lineRenderer.SetPosition(0, startPos);
-        lineRenderer.SetPosition(1, endPos);
-
-        laserCoroutine = StartCoroutine(DisableLaserAfterTime());
-    }
-
-    IEnumerator DisableLaserAfterTime()
-    {
-        yield return new WaitForSeconds(laserDuration);
-        lineRenderer.enabled = false;
-    }
-
     Vector2 GetCardinalDirection(Vector2 direction)
     {
         if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
             return new Vector2(Mathf.Sign(direction.x), 0);
+        }
         else
+        {
             return new Vector2(0, Mathf.Sign(direction.y));
+        }
     }
 }
