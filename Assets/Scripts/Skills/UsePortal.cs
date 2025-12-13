@@ -1,4 +1,6 @@
+using System.Net;
 using UnityEngine;
+using System.Collections;
 
 public class UsePortal : SkillBase
 {
@@ -10,9 +12,13 @@ public class UsePortal : SkillBase
     [SerializeField] private LayerMask wallLayer;
     [SerializeField]  private Transform firePoint;
 
+    [Header("Görsel Efektler")]
+    [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private float laserDuration = 0.1f;
+
     private GameObject currentBluePortal;
     private GameObject currentOrangePortal;
-
+    private Coroutine laserCoroutine;
 
     [Header("Ayarlar")]
     [SerializeField] private float rayDistance = 10f;
@@ -20,9 +26,38 @@ public class UsePortal : SkillBase
 
     private void Start()
     {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
         if (playerMovement == null)
             playerMovement = GetComponentInParent<PlayerMovement>();
 
+        if (lineRenderer == null)
+        {
+            // DÝKKAT: Burada GetComponent<LineRenderer>() ASLA KULLANMIYORUZ.
+            // Player'ýn içindeki "LaserEffect" isimli çocuðu arýyoruz.
+            Transform laserObj = player.transform.Find("LaserEffect");
+
+            if (laserObj != null)
+            {
+                Debug.Log("2. LaserEffect Objesi Bulundu!");
+                lineRenderer = laserObj.GetComponent<LineRenderer>();
+
+                if (lineRenderer != null)
+                {
+                    lineRenderer.enabled = false;
+                    Debug.Log("3. LineRenderer Baþarýyla Alýndý ve Kapatýldý.");
+                }
+                else
+                {
+                    Debug.LogError("HATA: 'LaserEffect' objesi var ama üzerinde 'Line Renderer' bileþeni YOK!");
+                }
+            }
+            else
+            {
+                // Eðer bulamazsa hiyerarþiyi kontrol et
+                Debug.LogError("HATA: Player'ýn içinde tam olarak 'LaserEffect' adýnda bir obje bulunamadý! Ýsim hatasý olabilir.");
+            }
+        }
 
         // 2. FirePoint Transformunu Bulma:
         // FirePoint'in Player objesinin bir alt objesi olduðunu varsayýyoruz.
@@ -75,6 +110,10 @@ public class UsePortal : SkillBase
         // 2. Raycast at
         RaycastHit2D hit = Physics2D.Raycast(origin, finalDirection, rayDistance, wallLayer);
 
+        Color laserColor = isBlue ? Color.blue : new Color(1f, 0.5f, 0f); // Mavi veya Turuncu
+        Vector2 endPoint = hit.collider != null ? hit.point : (origin + finalDirection * rayDistance);
+        DrawLaser(origin, endPoint, laserColor);
+
         // Debug Rengi: Mavi ise Mavi, deðilse Turuncu çizgi çek
         Color debugColor = isBlue ? Color.blue : new Color(1f, 0.5f, 0f);
         Debug.DrawRay(origin, finalDirection * rayDistance, debugColor, 0.2f);
@@ -97,6 +136,29 @@ public class UsePortal : SkillBase
             // fireBlueNext satýrýný sildik çünkü artýk manuel seçim yapýyoruz.
         }
     }
+    void DrawLaser(Vector2 startPos, Vector2 endPos, Color color)
+    {
+        if (lineRenderer == null) return;
+
+        // Eðer bir önceki lazerden kalan kapatma sayacý varsa durdur
+        if (laserCoroutine != null) StopCoroutine(laserCoroutine);
+
+        lineRenderer.enabled = true;
+        lineRenderer.startColor = color;
+        lineRenderer.endColor = color;
+        lineRenderer.SetPosition(0, startPos); // Baþlangýç
+        lineRenderer.SetPosition(1, endPos);   // Bitiþ
+
+        // Belirlenen süre sonra kapatmak için sayacý baþlat
+        laserCoroutine = StartCoroutine(DisableLaserAfterTime());
+    }
+
+    IEnumerator DisableLaserAfterTime()
+    {
+        yield return new WaitForSeconds(laserDuration);
+        lineRenderer.enabled = false;
+    }
+
 
     // --- AÞAÐIDAKÝLER AYNEN KALDI ---
 

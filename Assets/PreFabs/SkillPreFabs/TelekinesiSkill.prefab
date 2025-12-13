@@ -50,6 +50,8 @@ MonoBehaviour:
   currentDurability: 0
   playerMovement: {fileID: 0}
   firePoint: {fileID: 0}
+  lineRenderer: {fileID: 0}
+  laserDuration: 0.01
   pushForce: 100
   pullForce: 100
   range: 50
