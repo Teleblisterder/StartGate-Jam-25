@@ -55,5 +55,5 @@ MonoBehaviour:
   giantSpeedMult: 0.6
   tinySpeedMult: 1.3
   normalMass: 1
-  giantMass: 200
-  tinyMass: 0.5
+  giantMass: 1000
+  tinyMass: 0.001
