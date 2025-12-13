@@ -7,9 +7,11 @@ public class InputManager : MonoBehaviour
 
     public static PlayerInput PlayerInput;
     public static Vector2 Movement;
+    public static bool portalPressed;
 
 
     private InputAction _moveAction;
+    private InputAction _portalAction;
 
     private void Awake()
     {
@@ -24,10 +26,12 @@ public class InputManager : MonoBehaviour
         PlayerInput = GetComponent<PlayerInput>();
 
         _moveAction = PlayerInput.actions["Move"];
+        _portalAction = PlayerInput.actions["Portal"];
     }
     private void Update()
     {
-        Movement = _moveAction.ReadValue<Vector2>();
+        Movement = _moveAction.ReadValue<Vector2>().normalized;
+        portalPressed = _portalAction.WasPressedThisFrame();
 
     }
 
