@@ -8,6 +8,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 MovementInput;
 
     [SerializeField] private Animator animator;
+
+    public Vector2 FacingDirection { get; private set; } = Vector2.down;
     void Start()
     {
         Rigidbody2D = GetComponent<Rigidbody2D>();
@@ -33,6 +35,8 @@ public class PlayerMovement : MonoBehaviour
             animator.SetFloat("inputY", MovementInput.y);
             animator.SetFloat("LastInputX", MovementInput.x);
             animator.SetFloat("LastInputY", MovementInput.y);
+
+            FacingDirection = MovementInput.normalized;
         }
         else
         {
